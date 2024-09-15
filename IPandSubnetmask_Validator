@@ -1,0 +1,52 @@
+import re
+def validate_ip(ip):
+    ip_regex = r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$'
+    if re.match(ip_regex, ip):
+        octets = ip.split('.')
+        if all(0 <= int(octet) <= 255 for octet in octets):
+            return True
+    return False
+def format_binary(octet):
+    return bin(int(octet))[2:].zfill(8)
+def is_valid_subnet_mask(mask):
+    octets = mask.split('.')
+    if len(octets) != 4:
+        return "INVALID"
+    try:
+        octet_ints = [int(octet) for octet in octets]
+        if any(o < 0 or o > 255 for o in octet_ints):
+            return "INVALID"
+    except ValueError:
+        return "INVALID"
+    binary_mask = ''.join(format(int(octet), '08b') for octet in octets)
+    if '01' in binary_mask:
+        return "INVALID"
+    return "VALID"
+# List of IP addresses to validate
+ip_addresses = [
+    "192.16.27.100", "100.10.10.0", "255.0.0.0", "256.1.1.1", "255.1.1.1", 
+    "1.23.214.56", "123.1.23.456", "123.123.123.123", "12.1.1.1", "0.13.12.1", 
+    "78.2.45.9", "83.6.78.93", "34.67.97.24", "123.1.1.1", "3.202.201.44", 
+    "8.145.144.146", "111.112.113.114", "256.2.3.4", "345.3.4.456", "567.568.569", 
+    "1234.977.23.255", "132.34.2.-92", "132.-249.-53.12"
+]
+# List of Subnet masks to validate
+subnet_masks = [
+    "255.255.255.252", "128.0.0.0", "255.255.128.0", "255.254.255.255", 
+    "255.255.255.255", "255.255.255.252", "255.255.253.128", "255.253.255.252", 
+    "253.255.255.0", "0.255.255.252", "255.128.0.0", "255.255.240.0", 
+    "367.342.786.908", "12.32.456.23"
+]
+# Validate IP addresses
+print("IP Address Validation:")
+for ip in ip_addresses:
+    valid_ip = validate_ip(ip)
+    binary_ip = 'INVALID.' if not valid_ip else ''
+    binary_ip += '.'.join([format_binary(octet) for octet in ip.split('.')]) if valid_ip else ''
+    print(f"{ip}\n   {binary_ip}   {'VALID' if valid_ip else 'INVALID'}\n")
+# Validate Subnet Masks
+print("Subnet Mask Validation:")
+for mask in subnet_masks:
+    valid_status = is_valid_subnet_mask(mask)
+    binary_representation = '   '.join(format(int(octet), '08b') for octet in mask.split('.')) if valid_status == "VALID" else "INVALID"
+    print(f"{mask}\n{binary_representation}\n{valid_status}\n")
